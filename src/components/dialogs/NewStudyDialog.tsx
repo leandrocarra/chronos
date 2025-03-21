@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 
+// Usaremos apenas um tipo simplificado para a criação/edição de estudos
 export interface StudyItem {
   id: string;
   subject: string;

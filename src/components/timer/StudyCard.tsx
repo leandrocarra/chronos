@@ -21,14 +21,27 @@ import { formatTime } from '@/utils/timeUtils';
 interface StudyCardProps {
   id: string;
   subject: string;
+  initialSeconds?: number;
+  initialIsActive?: boolean;
+  initialIsPaused?: boolean;
   onDelete?: (id: string) => void;
   onEdit?: (id: string) => void;
+  onTimerUpdate?: (id: string, seconds: number, isActive: boolean, isPaused: boolean) => void;
 }
 
-const StudyCard: React.FC<StudyCardProps> = ({ id, subject, onDelete, onEdit }) => {
-  const [seconds, setSeconds] = useState<number>(0);
-  const [isActive, setIsActive] = useState<boolean>(false);
-  const [isPaused, setIsPaused] = useState<boolean>(true);
+const StudyCard: React.FC<StudyCardProps> = ({ 
+  id, 
+  subject, 
+  initialSeconds = 0,
+  initialIsActive = false,
+  initialIsPaused = true,
+  onDelete, 
+  onEdit,
+  onTimerUpdate
+}) => {
+  const [seconds, setSeconds] = useState<number>(initialSeconds);
+  const [isActive, setIsActive] = useState<boolean>(initialIsActive);
+  const [isPaused, setIsPaused] = useState<boolean>(initialIsPaused);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -46,19 +59,52 @@ const StudyCard: React.FC<StudyCardProps> = ({ id, subject, onDelete, onEdit }) 
     };
   }, [isActive, isPaused]);
 
+  // Efeito para salvar o estado do timer no banco sempre que ele for pausado ou atualizado
+  useEffect(() => {
+    // Não atualizar imediatamente quando o componente é montado
+    const shouldSkipInitialUpdate = 
+      seconds === initialSeconds && 
+      isActive === initialIsActive && 
+      isPaused === initialIsPaused;
+    
+    if (shouldSkipInitialUpdate || !onTimerUpdate) return;
+
+    // Atualizar o banco quando o timer é pausado ou quando o segundos mudar a cada 5 segundos
+    const shouldUpdate = isPaused || seconds % 5 === 0;
+    
+    if (shouldUpdate) {
+      onTimerUpdate(id, seconds, isActive, isPaused);
+    }
+  }, [id, seconds, isActive, isPaused, initialSeconds, initialIsActive, initialIsPaused, onTimerUpdate]);
+
   const handleStart = () => {
     setIsActive(true);
     setIsPaused(false);
+    
+    // Atualizar o estado do timer no banco quando iniciar
+    if (onTimerUpdate) {
+      onTimerUpdate(id, seconds, true, false);
+    }
   };
 
   const handlePause = () => {
     setIsPaused(true);
+    
+    // Atualizar o estado do timer no banco quando pausar
+    if (onTimerUpdate) {
+      onTimerUpdate(id, seconds, true, true);
+    }
   };
 
   const handleReset = () => {
     setIsActive(false);
     setIsPaused(true);
     setSeconds(0);
+    
+    // Atualizar o estado do timer no banco quando resetar
+    if (onTimerUpdate) {
+      onTimerUpdate(id, 0, false, true);
+    }
   };
 
   const handleEdit = () => {
