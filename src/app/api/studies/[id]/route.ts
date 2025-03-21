@@ -10,7 +10,7 @@ type Params = {
 // GET - Buscar um estudo específico
 export async function GET(request: NextRequest, { params }: Params) {
   try {
-    const { id } = params;
+    const id = params.id;
 
     const study = await prisma.study.findUnique({
       where: { id },
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest, { params }: Params) {
 // PUT - Atualizar um estudo específico
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
-    const { id } = params;
+    const id = params.id;
     const body = await request.json();
     const { subject, seconds, isActive, isPaused } = body;
 
@@ -65,7 +65,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     return NextResponse.json(updatedStudy);
   } catch (error) {
-    console.error(`Erro ao atualizar estudo com ID ${params.id}:`, error);
+    const id = params?.id || 'desconhecido';
+    console.error(`Erro ao atualizar estudo com ID ${id}:`, error);
     return NextResponse.json(
       { error: "Erro ao atualizar o estudo" },
       { status: 500 }
@@ -76,7 +77,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 // DELETE - Excluir um estudo específico
 export async function DELETE(request: NextRequest, { params }: Params) {
   try {
-    const { id } = params;
+    const id = params.id;
 
     // Verifica se o estudo existe
     const existingStudy = await prisma.study.findUnique({
@@ -100,7 +101,8 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       { status: 200 }
     );
   } catch (error) {
-    console.error(`Erro ao excluir estudo com ID ${params.id}:`, error);
+    const id = params?.id || 'desconhecido';
+    console.error(`Erro ao excluir estudo com ID ${id}:`, error);
     return NextResponse.json(
       { error: "Erro ao excluir o estudo" },
       { status: 500 }
