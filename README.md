@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🕒 Chronos - Cronômetro de Estudos
 
-## Getting Started
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Material UI](https://img.shields.io/badge/Material_UI-5-blue?style=for-the-badge&logo=mui)](https://mui.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 
-First, run the development server:
+**Chronos** é um aplicativo web moderno desenvolvido para ajudar estudantes e profissionais a gerenciar seu tempo de estudo de forma eficiente e organizada.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+![Chronos Screenshot](https://via.placeholder.com/800x400?text=Chronos+App+Screenshot)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Funcionalidades
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- ⏱️ **Cronômetro Preciso**: Controle o tempo de estudo com precisão
+- 📝 **Registro de Assuntos**: Documente o que está estudando
+- 📊 **Histórico de Sessões**: Visualize e acompanhe seu progresso
+- 💾 **Persistência Local**: Seus dados são salvos no navegador
+- 📱 **Responsivo**: Funciona em dispositivos móveis e desktop
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Começando
 
-## Learn More
+### Pré-requisitos
 
-To learn more about Next.js, take a look at the following resources:
+- Node.js 18.0.0 ou superior
+- npm ou yarn
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Instalação
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Clone o repositório
+   ```bash
+   git clone https://github.com/seu-usuario/chronos.git
+   cd chronos
+   ```
 
-## Deploy on Vercel
+2. Instale as dependências
+   ```bash
+   npm install
+   # ou
+   yarn install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Inicie o servidor de desenvolvimento
+   ```bash
+   npm run dev
+   # ou
+   yarn dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Abra [http://localhost:3000](http://localhost:3000) no seu navegador
+
+## 🛠️ Tecnologias
+
+- **[Next.js](https://nextjs.org/)**: Framework React para aplicações web
+- **[Material UI](https://mui.com/)**: Biblioteca de componentes para interfaces modernas
+- **[TypeScript](https://www.typescriptlang.org/)**: Superset JavaScript com tipagem estática
+- **[Emotion](https://emotion.sh/)**: Biblioteca CSS-in-JS para estilização
+- **[UUID](https://github.com/uuidjs/uuid)**: Geração de identificadores únicos
+
+## 📱 Uso
+
+1. **Iniciar uma sessão de estudo**:
+   - Digite o assunto que você está estudando
+   - Clique em "Iniciar" para começar o cronômetro
+
+2. **Gerenciar o cronômetro**:
+   - Use "Pausar" para interromper temporariamente
+   - Use "Finalizar" para encerrar e registrar a sessão
+
+3. **Visualizar histórico**:
+   - Suas sessões anteriores aparecem automaticamente na seção "Histórico de sessões"
+   - Veja a duração e o horário de cada sessão
+
+## 🤝 Contribuição
+
+Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
+
+1. Faça um fork do projeto
+2. Crie sua branch de feature (`git checkout -b feature/amazing-feature`)
+3. Commit suas mudanças (`git commit -m 'Add some amazing feature'`)
+4. Push para a branch (`git push origin feature/amazing-feature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 📧 Contato
+
+Nome - [email@example.com](mailto:email@example.com)
+
+Link do Projeto: [https://github.com/seu-usuario/chronos](https://github.com/seu-usuario/chronos)
+
+---
+
+⭐️ Desenvolvido com ❤️ para otimizar seu tempo de estudo
