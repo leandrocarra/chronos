@@ -26,7 +26,7 @@ export const studyService = {
   // Obter todos os estudos
   async getAllStudies() {
     try {
-      const response = await fetch("/api/studies");
+      const response = await fetch('/api/studies');
       if (!response.ok) {
         throw new Error("Falha ao buscar os estudos");
       }
@@ -54,10 +54,10 @@ export const studyService = {
   // Criar um novo estudo
   async createStudy(studyData: NewStudy) {
     try {
-      const response = await fetch("/api/studies", {
-        method: "POST",
+      const response = await fetch('/api/studies', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(studyData),
       });
@@ -77,9 +77,9 @@ export const studyService = {
   async updateStudy(id: string, studyData: UpdateStudy) {
     try {
       const response = await fetch(`/api/studies/${id}`, {
-        method: "PUT",
+        method: 'PUT',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(studyData),
       });
@@ -99,7 +99,7 @@ export const studyService = {
   async deleteStudy(id: string) {
     try {
       const response = await fetch(`/api/studies/${id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       if (!response.ok) {

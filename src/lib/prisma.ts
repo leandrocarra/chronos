@@ -3,8 +3,8 @@ import { PrismaClient } from "@prisma/client";
 // Prevenir múltiplas instâncias do Prisma Client em desenvolvimento
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
-export const prisma = globalForPrisma.prisma || new PrismaClient();
+export const prisma = globalForPrisma.prisma || new PrismaClient({
+  log: ['query', 'error', 'warn'],
+});
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-
-export default prisma; 
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma; 

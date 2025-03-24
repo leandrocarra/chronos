@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma-client";
 
 // GET - Listar todos os estudos
 export async function GET() {

@@ -9,7 +9,7 @@ import NewStudyDialog, { StudyItem } from '@/components/dialogs/NewStudyDialog';
 import { studyService, Study } from '@/utils/studyService';
 
 // ID do usuário criado no banco de dados
-const TEMP_USER_ID = '52d98171-af54-4c0c-8364-d2cd616389ce';
+const TEMP_USER_ID = '83e5accb-00ea-4f44-a0d3-f45e2a2ed543';
 
 export default function Home() {
   const [studies, setStudies] = useState<Study[]>([]);
