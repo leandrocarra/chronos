@@ -10,7 +10,14 @@ type Params = {
 // GET - Buscar um estudo específico
 export async function GET(request: NextRequest, { params }: Params) {
   try {
-    const id = params.id;
+    const id = params?.id;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID do estudo não fornecido" },
+        { status: 400 }
+      );
+    }
 
     const study = await prisma.study.findUnique({
       where: { id },
@@ -25,7 +32,7 @@ export async function GET(request: NextRequest, { params }: Params) {
 
     return NextResponse.json(study);
   } catch (error) {
-    console.error(`Erro ao buscar estudo com ID ${params.id}:`, error);
+    console.error(`Erro ao buscar estudo com ID ${params?.id || 'desconhecido'}:`, error);
     return NextResponse.json(
       { error: "Erro ao buscar o estudo" },
       { status: 500 }
@@ -36,7 +43,15 @@ export async function GET(request: NextRequest, { params }: Params) {
 // PUT - Atualizar um estudo específico
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
-    const id = params.id;
+    const id = params?.id;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID do estudo não fornecido" },
+        { status: 400 }
+      );
+    }
+
     const body = await request.json();
 
     // Verifica se o estudo existe
@@ -59,7 +74,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     return NextResponse.json(updatedStudy);
   } catch (error) {
-    console.error(`Erro ao atualizar estudo com ID ${params.id}:`, error);
+    console.error(`Erro ao atualizar estudo com ID ${params?.id || 'desconhecido'}:`, error);
     return NextResponse.json(
       { error: "Erro ao atualizar o estudo" },
       { status: 500 }
@@ -70,7 +85,14 @@ export async function PUT(request: NextRequest, { params }: Params) {
 // DELETE - Excluir um estudo específico
 export async function DELETE(request: NextRequest, { params }: Params) {
   try {
-    const id = params.id;
+    const id = params?.id;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID do estudo não fornecido" },
+        { status: 400 }
+      );
+    }
 
     // Verifica se o estudo existe
     const existingStudy = await prisma.study.findUnique({
@@ -94,8 +116,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       { status: 200 }
     );
   } catch (error) {
-    const id = params?.id || 'desconhecido';
-    console.error(`Erro ao excluir estudo com ID ${id}:`, error);
+    console.error(`Erro ao excluir estudo com ID ${params?.id || 'desconhecido'}:`, error);
     return NextResponse.json(
       { error: "Erro ao excluir o estudo" },
       { status: 500 }
