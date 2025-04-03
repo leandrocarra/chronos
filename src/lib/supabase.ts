@@ -1,11 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
+import { type Database } from '@/types/database.types';
 
 // Cria o cliente Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 
-// ATENÇÃO: Usar a SERVICE_ROLE_KEY é apenas uma solução temporária para desenvolvimento
-// Em produção, você deve usar a ANON_KEY e configurar corretamente as políticas RLS
-// Para desenvolvimento/teste, substitua a variável abaixo pela sua SERVICE_ROLE_KEY
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+// Em ambiente de produção, use apenas a chave anônima
+// A SERVICE_ROLE_KEY só deve ser usada no servidor e nunca exposta no cliente
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 
-export const supabase = createClient(supabaseUrl, supabaseKey); 
+// Cria o cliente com a chave anônima para uso no browser
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    storageKey: 'chronos-auth',
+    autoRefreshToken: true,
+  },
+}); 

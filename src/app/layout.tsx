@@ -1,6 +1,8 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import ThemeRegistry from './ThemeRegistry';
+import AuthProviderWrapper from './AuthProviderWrapper';
+import NavBarWrapper from './NavBarWrapper';
 
 export const metadata = {
   title: "Chronos - Cronômetro de Estudos",
@@ -21,7 +23,10 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={inter.className}>
         <ThemeRegistry>
-          {children}
+          <AuthProviderWrapper>
+            <NavBarWrapper />
+            {children}
+          </AuthProviderWrapper>
         </ThemeRegistry>
       </body>
     </html>

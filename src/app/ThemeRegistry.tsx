@@ -7,7 +7,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useState, useEffect, useMemo } from 'react';
 import { useMediaQuery } from '@mui/material';
-import { blue, lightBlue, indigo, grey } from '@mui/material/colors';
+import { blue, lightBlue, indigo } from '@mui/material/colors';
 
 // Função auxiliar para criar o cache de emotion
 const createEmotionCache = () => {

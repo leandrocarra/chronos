@@ -1,15 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Container, CircularProgress } from '@mui/material';
+import { Box, Typography, Grid, Container, CircularProgress, Button } from '@mui/material';
 import Layout from '@/components/layout/Layout';
 import StudyCard from '@/components/timer/StudyCard';
 import AddStudyCard from '@/components/timer/AddStudyCard';
 import NewStudyDialog, { StudyItem } from '@/components/dialogs/NewStudyDialog';
 import { studyService, Study } from '@/utils/studyService';
-
-// ID do usuário criado no banco de dados
-const TEMP_USER_ID = '83e5accb-00ea-4f44-a0d3-f45e2a2ed543';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const [studies, setStudies] = useState<Study[]>([]);
@@ -17,14 +16,64 @@ export default function Home() {
   const [editItem, setEditItem] = useState<StudyItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user, isAuthenticated, loading: authLoading, demoMode } = useAuth();
+  const router = useRouter();
+
+  // Redirecionar para login se não estiver autenticado e não estiver em modo demo
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   // Carregar estudos do banco de dados ao iniciar
   useEffect(() => {
     async function loadStudies() {
+      if (!isAuthenticated && !demoMode) return;
+      
       try {
         setIsLoading(true);
-        const dbStudies = await studyService.getAllStudies();
-        setStudies(dbStudies);
+        // Se estiver em modo demo, carregue dados de exemplo
+        if (demoMode) {
+          const currentDate = new Date();
+          const demoStudies: Study[] = [
+            { 
+              id: 'demo-1', 
+              subject: 'Matemática (Demo)', 
+              seconds: 0, 
+              isActive: false, 
+              isPaused: false, 
+              userId: 'demo-user',
+              createdAt: currentDate,
+              updatedAt: currentDate
+            },
+            { 
+              id: 'demo-2', 
+              subject: 'Física (Demo)', 
+              seconds: 0, 
+              isActive: false, 
+              isPaused: false, 
+              userId: 'demo-user',
+              createdAt: currentDate,
+              updatedAt: currentDate
+            },
+            { 
+              id: 'demo-3', 
+              subject: 'Programação (Demo)', 
+              seconds: 0, 
+              isActive: false, 
+              isPaused: false, 
+              userId: 'demo-user',
+              createdAt: currentDate,
+              updatedAt: currentDate
+            }
+          ];
+          setStudies(demoStudies);
+        } else {
+          // Se estiver autenticado, carregue do banco de dados
+          const dbStudies = await studyService.getAllStudies();
+          setStudies(dbStudies);
+        }
         setError(null);
       } catch (err) {
         console.error('Erro ao carregar estudos:', err);
@@ -35,7 +84,7 @@ export default function Home() {
     }
 
     loadStudies();
-  }, []);
+  }, [isAuthenticated, demoMode]);
 
   const handleAddNewStudy = () => {
     setEditItem(null);
@@ -55,8 +104,14 @@ export default function Home() {
 
   const handleDeleteStudy = async (id: string) => {
     try {
-      await studyService.deleteStudy(id);
-      setStudies(prev => prev.filter(study => study.id !== id));
+      if (demoMode) {
+        // Em modo demo, apenas remove do estado local
+        setStudies(prev => prev.filter(study => study.id !== id));
+      } else {
+        // Comportamento normal com persistência
+        await studyService.deleteStudy(id);
+        setStudies(prev => prev.filter(study => study.id !== id));
+      }
     } catch (err) {
       console.error('Erro ao excluir estudo:', err);
       setError('Falha ao excluir o estudo. Por favor, tente novamente.');
@@ -65,24 +120,49 @@ export default function Home() {
 
   const handleSaveStudy = async (study: StudyItem) => {
     try {
-      if (editItem) {
-        // Atualizar estudo existente
-        const existingStudy = studies.find(s => s.id === study.id);
-        if (existingStudy) {
-          const updatedStudy = await studyService.updateStudy(study.id, {
-            subject: study.subject
-          });
+      if (demoMode) {
+        // Em modo demo, apenas manipule o estado local
+        if (editItem) {
+          // Atualizar estudo existente
           setStudies(prev => 
-            prev.map(s => s.id === study.id ? updatedStudy : s)
+            prev.map(s => s.id === study.id ? {...s, subject: study.subject} : s)
           );
+        } else {
+          // Adicionar novo estudo
+          const currentDate = new Date();
+          const newStudy: Study = {
+            id: `demo-${Date.now()}`,
+            subject: study.subject,
+            seconds: 0,
+            isActive: false,
+            isPaused: false,
+            userId: 'demo-user',
+            createdAt: currentDate,
+            updatedAt: currentDate
+          };
+          setStudies(prev => [...prev, newStudy]);
         }
       } else {
-        // Adicionar novo estudo
-        const newStudy = await studyService.createStudy({
-          subject: study.subject,
-          userId: TEMP_USER_ID
-        });
-        setStudies(prev => [...prev, newStudy]);
+        // Comportamento normal com persistência
+        if (editItem) {
+          // Atualizar estudo existente
+          const existingStudy = studies.find(s => s.id === study.id);
+          if (existingStudy) {
+            const updatedStudy = await studyService.updateStudy(study.id, {
+              subject: study.subject
+            });
+            setStudies(prev => 
+              prev.map(s => s.id === study.id ? updatedStudy : s)
+            );
+          }
+        } else {
+          // Adicionar novo estudo
+          const newStudy = await studyService.createStudy({
+            subject: study.subject,
+            userId: user?.id || ''
+          });
+          setStudies(prev => [...prev, newStudy]);
+        }
       }
     } catch (err) {
       console.error('Erro ao salvar estudo:', err);
@@ -92,18 +172,40 @@ export default function Home() {
 
   const handleUpdateStudyTimer = async (studyId: string, seconds: number, isActive: boolean, isPaused: boolean) => {
     try {
-      const updatedStudy = await studyService.updateStudy(studyId, {
-        seconds,
-        isActive,
-        isPaused
-      });
-      setStudies(prev => 
-        prev.map(s => s.id === studyId ? updatedStudy : s)
-      );
+      if (demoMode) {
+        // Em modo demo, apenas atualiza o estado local
+        setStudies(prev => 
+          prev.map(s => s.id === studyId ? {...s, seconds, isActive, isPaused} : s)
+        );
+      } else {
+        // Comportamento normal com persistência
+        const updatedStudy = await studyService.updateStudy(studyId, {
+          seconds,
+          isActive,
+          isPaused
+        });
+        setStudies(prev => 
+          prev.map(s => s.id === studyId ? updatedStudy : s)
+        );
+      }
     } catch (err) {
       console.error('Erro ao atualizar timer de estudo:', err);
     }
   };
+
+  // Se estiver carregando a autenticação, mostre o indicador de carregamento
+  if (authLoading) {
+    return (
+      <Container maxWidth="sm" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
+  // Se não estiver autenticado e não estiver em modo demo, não renderize o conteúdo
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <Layout>

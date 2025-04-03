@@ -2,8 +2,8 @@
 // Esta chave é mais privilegiada que a chave anônima
 // Você pode encontrá-la no painel do Supabase > Project Settings > API
 
+import { createClient } from '@supabase/supabase-js';
 require('dotenv').config({ path: '../../.env' });
-const { createClient } = require('@supabase/supabase-js');
 
 async function fixSchemaIssue() {
   console.log('Instruções para obter a SERVICE_ROLE_KEY:');

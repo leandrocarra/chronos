@@ -1,5 +1,5 @@
+import { createClient } from '@supabase/supabase-js';
 require('dotenv').config({ path: '../../.env' });
-const { createClient } = require('@supabase/supabase-js');
 
 async function testServiceRole() {
   console.log('Testando acesso com service_role key...');

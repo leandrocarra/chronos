@@ -1,5 +1,5 @@
+import { createClient } from '@supabase/supabase-js';
 require('dotenv').config({ path: '../../.env' });
-const { createClient } = require('@supabase/supabase-js');
 
 async function testSupabaseWithoutRLS() {
   console.log('Preparando para testar o Supabase com RLS desativado...');

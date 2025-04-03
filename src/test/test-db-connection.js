@@ -1,3 +1,4 @@
+import { createClient } from '@supabase/supabase-js';
 require('dotenv').config({ path: '../../.env' });
 const { PrismaClient } = require('@prisma/client');
 

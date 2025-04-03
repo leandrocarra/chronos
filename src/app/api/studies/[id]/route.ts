@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-type Params = {
-  params: {
-    id: string;
-  };
-};
-
 // GET - Buscar um estudo específico
-export async function GET(request: NextRequest, { params }: Params) {
+export async function GET(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
-    const id = params?.id;
+    const id = context.params.id;
 
     if (!id) {
       return NextResponse.json(
@@ -32,7 +29,7 @@ export async function GET(request: NextRequest, { params }: Params) {
 
     return NextResponse.json(study);
   } catch (error) {
-    console.error(`Erro ao buscar estudo com ID ${params?.id || 'desconhecido'}:`, error);
+    console.error(`Erro ao buscar estudo com ID ${context.params.id || 'desconhecido'}:`, error);
     return NextResponse.json(
       { error: "Erro ao buscar o estudo" },
       { status: 500 }
@@ -41,9 +38,12 @@ export async function GET(request: NextRequest, { params }: Params) {
 }
 
 // PUT - Atualizar um estudo específico
-export async function PUT(request: NextRequest, { params }: Params) {
+export async function PUT(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
-    const id = params?.id;
+    const id = context.params.id;
 
     if (!id) {
       return NextResponse.json(
@@ -74,7 +74,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     return NextResponse.json(updatedStudy);
   } catch (error) {
-    console.error(`Erro ao atualizar estudo com ID ${params?.id || 'desconhecido'}:`, error);
+    console.error(`Erro ao atualizar estudo com ID ${context.params.id || 'desconhecido'}:`, error);
     return NextResponse.json(
       { error: "Erro ao atualizar o estudo" },
       { status: 500 }
@@ -83,9 +83,12 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 // DELETE - Excluir um estudo específico
-export async function DELETE(request: NextRequest, { params }: Params) {
+export async function DELETE(
+  request: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
-    const id = params?.id;
+    const id = context.params.id;
 
     if (!id) {
       return NextResponse.json(
@@ -116,7 +119,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       { status: 200 }
     );
   } catch (error) {
-    console.error(`Erro ao excluir estudo com ID ${params?.id || 'desconhecido'}:`, error);
+    console.error(`Erro ao excluir estudo com ID ${context.params.id || 'desconhecido'}:`, error);
     return NextResponse.json(
       { error: "Erro ao excluir o estudo" },
       { status: 500 }

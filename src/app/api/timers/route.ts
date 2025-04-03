@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // GET - Listar todas as sessões de timer
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const timers = await prisma.timerSession.findMany({
       include: {
