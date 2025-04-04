@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma-client";
 
+// Função auxiliar para verificar se o Prisma Client está inicializado
+function isPrismaInitialized() {
+  try {
+    // Tentativa simples de acessar o Prisma
+    return !!prisma;
+  } catch (error) {
+    console.error("Erro ao verificar o Prisma Client:", error);
+    return false;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -18,27 +29,44 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
     }
     
+    // Verificar se o Prisma Client está inicializado
+    if (!isPrismaInitialized()) {
+      console.error("Prisma Client não foi inicializado corretamente");
+      return NextResponse.json(
+        { error: 'Serviço temporariamente indisponível' },
+        { status: 503 }
+      );
+    }
+    
     // Processar eventos do Supabase Auth
     if (type === 'user.created') {
       const { id, email, user_metadata } = record;
       const name = user_metadata?.name || email?.split('@')[0] || 'Usuário';
       
-      // Verificar se o usuário já existe
-      const existingUser = await prisma.user.findUnique({
-        where: { id },
-      });
-      
-      if (!existingUser) {
-        // Criar usuário na tabela users
-        await prisma.user.create({
-          data: {
-            id,
-            name,
-            email,
-          },
+      try {
+        // Verificar se o usuário já existe
+        const existingUser = await prisma.user.findUnique({
+          where: { id },
         });
         
-        console.log(`Usuário ${id} criado com sucesso na tabela users`);
+        if (!existingUser) {
+          // Criar usuário na tabela users
+          await prisma.user.create({
+            data: {
+              id,
+              name,
+              email,
+            },
+          });
+          
+          console.log(`Usuário ${id} criado com sucesso na tabela users`);
+        }
+      } catch (dbError) {
+        console.error('Erro ao acessar o banco de dados:', dbError);
+        return NextResponse.json(
+          { error: 'Erro ao processar operação no banco de dados' },
+          { status: 500 }
+        );
       }
     }
     
