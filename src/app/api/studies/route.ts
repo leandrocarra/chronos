@@ -1,23 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
-// Removendo temporariamente a dependência do Prisma para fazer o deploy funcionar
-// import { prisma } from "@/lib/prisma-client";
+import { prisma } from "@/lib/prisma-client";
+
+// Middleware para adicionar cabeçalhos CORS
+function corsHeaders() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  };
+}
+
+// Manipulador de requisições OPTIONS para preflight CORS
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders() });
+}
 
 // GET - Listar todos os estudos
 export async function GET() {
   try {
-    // Versão simplificada para fazer o deploy funcionar
-    // Retorna uma lista vazia temporariamente
-    return NextResponse.json([]);
+    console.log("🔍 API: GET /api/studies - Iniciando busca de estudos");
+    const studies = await prisma.study.findMany({
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    });
     
-    /* Código original:
-    const studies = await prisma.study.findMany();
-    return NextResponse.json(studies);
-    */
+    console.log(`🔍 API: Encontrados ${studies.length} estudos`);
+    return NextResponse.json(studies, { headers: corsHeaders() });
   } catch (error) {
-    console.error('Erro ao buscar estudos:', error);
+    console.error("❌ API: Erro ao buscar os estudos:", error);
     return NextResponse.json(
       { error: "Erro ao buscar os estudos" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }
@@ -25,24 +39,42 @@ export async function GET() {
 // POST - Criar um novo estudo
 export async function POST(request: NextRequest) {
   try {
-    // Versão simplificada para fazer o deploy funcionar
+    console.log("🔍 API: POST /api/studies - Iniciando criação de estudo");
     const body = await request.json();
-    return NextResponse.json({ id: "temp-id", ...body });
-    
-    /* Código original:
-    const body = await request.json();
+    let { subject, userId } = body;
 
-    const newStudy = await prisma.study.create({
-      data: body,
+    console.log("🔍 API: Dados recebidos:", { subject, userId });
+
+    // Valida os dados recebidos
+    if (!subject) {
+      console.log("❌ API: Dados inválidos - subject ausente");
+      return NextResponse.json(
+        { error: "Assunto é obrigatório" },
+        { status: 400, headers: corsHeaders() }
+      );
+    }
+
+    // Define um ID de usuário padrão se não for fornecido
+    if (!userId) {
+      userId = "83e5accb-00ea-4f44-a0d3-f45e2a2ed543"; // ID do usuário padrão
+      console.log("🔍 API: Usando ID de usuário padrão:", userId);
+    }
+
+    // Cria o estudo
+    const study = await prisma.study.create({
+      data: {
+        subject,
+        userId,
+      },
     });
 
-    return NextResponse.json(newStudy);
-    */
+    console.log("✅ API: Estudo criado com sucesso:", { id: study.id, subject: study.subject });
+    return NextResponse.json(study, { status: 201, headers: corsHeaders() });
   } catch (error) {
-    console.error('Erro ao criar estudo:', error);
+    console.error("❌ API: Erro ao criar estudo:", error);
     return NextResponse.json(
-      { error: "Erro ao criar o estudo" },
-      { status: 500 }
+      { error: "Erro ao criar estudo" },
+      { status: 500, headers: corsHeaders() }
     );
   }
 } 

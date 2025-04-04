@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '../../.env' });
+import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 
 async function testSupabase() {
@@ -9,7 +9,7 @@ async function testSupabase() {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   
   console.log(`URL: ${supabaseUrl}`);
-  console.log(`Key: ${supabaseAnonKey.substring(0, 10)}...`);
+  console.log(`Key: ${supabaseAnonKey?.substring(0, 10)}...`);
   
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -36,7 +36,7 @@ async function testSupabase() {
       .insert([
         { 
           subject: 'Teste via SDK', 
-          user_id: '83e5accb-00ea-4f44-a0d3-f45e2a2ed543',
+          user_id: '83e5accb-00ea-4f44-a0d3-f45e2a2ed54c',
           is_active: false,
           is_paused: true,
           seconds: 0

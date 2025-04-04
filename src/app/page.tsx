@@ -10,6 +10,9 @@ import { studyService, Study } from '@/utils/studyService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
+// URL base da API - ajustada para funcionar tanto localmente quanto na Vercel
+const API_BASE_URL = '';
+
 export default function Home() {
   const [studies, setStudies] = useState<Study[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -33,53 +36,32 @@ export default function Home() {
       
       try {
         setIsLoading(true);
-        // Se estiver em modo demo, carregue dados de exemplo
-        if (demoMode) {
-          const currentDate = new Date();
-          const demoStudies: Study[] = [
-            { 
-              id: 'demo-1', 
-              subject: 'Matemática (Demo)', 
-              seconds: 0, 
-              isActive: false, 
-              isPaused: false, 
-              userId: 'demo-user',
-              createdAt: currentDate,
-              updatedAt: currentDate
-            },
-            { 
-              id: 'demo-2', 
-              subject: 'Física (Demo)', 
-              seconds: 0, 
-              isActive: false, 
-              isPaused: false, 
-              userId: 'demo-user',
-              createdAt: currentDate,
-              updatedAt: currentDate
-            },
-            { 
-              id: 'demo-3', 
-              subject: 'Programação (Demo)', 
-              seconds: 0, 
-              isActive: false, 
-              isPaused: false, 
-              userId: 'demo-user',
-              createdAt: currentDate,
-              updatedAt: currentDate
-            }
-          ];
-          setStudies(demoStudies);
-        } else {
-          // Se estiver autenticado, carregue do banco de dados
-          const dbStudies = await studyService.getAllStudies();
+        console.log("🔍 Debug: Carregando estudos...");
+        console.log("🔍 isAuthenticated:", isAuthenticated);
+        console.log("🔍 demoMode:", demoMode);
+        
+        // Carregar dados do banco para todos os modos
+        console.log("🔍 Carregando estudos do banco de dados");
+        try {
+          const dbStudies = await fetch(`${API_BASE_URL}/api/studies`).then(res => {
+            console.log("🔍 Status da resposta:", res.status);
+            if (!res.ok) throw new Error("Erro na resposta da API");
+            return res.json();
+          });
+          console.log("🔍 Estudos carregados:", dbStudies);
           setStudies(dbStudies);
+        } catch (error) {
+          console.error("🔍 Erro ao carregar estudos do banco:", error);
+          throw error;
         }
+        
         setError(null);
       } catch (err) {
         console.error('Erro ao carregar estudos:', err);
         setError('Falha ao carregar os estudos. Por favor, tente novamente.');
       } finally {
         setIsLoading(false);
+        console.log("🔍 Carregamento de estudos concluído");
       }
     }
 
@@ -104,14 +86,14 @@ export default function Home() {
 
   const handleDeleteStudy = async (id: string) => {
     try {
-      if (demoMode) {
-        // Em modo demo, apenas remove do estado local
-        setStudies(prev => prev.filter(study => study.id !== id));
-      } else {
-        // Comportamento normal com persistência
-        await studyService.deleteStudy(id);
-        setStudies(prev => prev.filter(study => study.id !== id));
-      }
+      // Comportamento normal com persistência
+      console.log(`🔍 Excluindo estudo com ID ${id}`);
+      const response = await fetch(`${API_BASE_URL}/api/studies/${id}`, {
+        method: 'DELETE',
+      });
+      console.log("🔍 Status da resposta de exclusão:", response.status);
+      if (!response.ok) throw new Error("Erro ao excluir estudo");
+      setStudies(prev => prev.filter(study => study.id !== id));
     } catch (err) {
       console.error('Erro ao excluir estudo:', err);
       setError('Falha ao excluir o estudo. Por favor, tente novamente.');
@@ -120,49 +102,45 @@ export default function Home() {
 
   const handleSaveStudy = async (study: StudyItem) => {
     try {
-      if (demoMode) {
-        // Em modo demo, apenas manipule o estado local
-        if (editItem) {
-          // Atualizar estudo existente
+      // Sempre utilizar persistência
+      if (editItem) {
+        // Atualizar estudo existente
+        const existingStudy = studies.find(s => s.id === study.id);
+        if (existingStudy) {
+          console.log(`🔍 Atualizando estudo com ID ${study.id}`);
+          const response = await fetch(`${API_BASE_URL}/api/studies/${study.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              subject: study.subject
+            }),
+          });
+          console.log("🔍 Status da resposta de atualização:", response.status);
+          if (!response.ok) throw new Error("Erro ao atualizar estudo");
+          const updatedStudy = await response.json();
           setStudies(prev => 
-            prev.map(s => s.id === study.id ? {...s, subject: study.subject} : s)
+            prev.map(s => s.id === study.id ? updatedStudy : s)
           );
-        } else {
-          // Adicionar novo estudo
-          const currentDate = new Date();
-          const newStudy: Study = {
-            id: `demo-${Date.now()}`,
-            subject: study.subject,
-            seconds: 0,
-            isActive: false,
-            isPaused: false,
-            userId: 'demo-user',
-            createdAt: currentDate,
-            updatedAt: currentDate
-          };
-          setStudies(prev => [...prev, newStudy]);
         }
       } else {
-        // Comportamento normal com persistência
-        if (editItem) {
-          // Atualizar estudo existente
-          const existingStudy = studies.find(s => s.id === study.id);
-          if (existingStudy) {
-            const updatedStudy = await studyService.updateStudy(study.id, {
-              subject: study.subject
-            });
-            setStudies(prev => 
-              prev.map(s => s.id === study.id ? updatedStudy : s)
-            );
-          }
-        } else {
-          // Adicionar novo estudo
-          const newStudy = await studyService.createStudy({
+        // Adicionar novo estudo
+        console.log("🔍 Criando novo estudo:", study.subject);
+        const response = await fetch(`${API_BASE_URL}/api/studies`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
             subject: study.subject,
-            userId: user?.id || ''
-          });
-          setStudies(prev => [...prev, newStudy]);
-        }
+            userId: user?.id || '83e5accb-00ea-4f44-a0d3-f45e2a2ed543'
+          }),
+        });
+        console.log("🔍 Status da resposta de criação:", response.status);
+        if (!response.ok) throw new Error("Erro ao criar estudo");
+        const newStudy = await response.json();
+        setStudies(prev => [...prev, newStudy]);
       }
     } catch (err) {
       console.error('Erro ao salvar estudo:', err);
@@ -172,22 +150,25 @@ export default function Home() {
 
   const handleUpdateStudyTimer = async (studyId: string, seconds: number, isActive: boolean, isPaused: boolean) => {
     try {
-      if (demoMode) {
-        // Em modo demo, apenas atualiza o estado local
-        setStudies(prev => 
-          prev.map(s => s.id === studyId ? {...s, seconds, isActive, isPaused} : s)
-        );
-      } else {
-        // Comportamento normal com persistência
-        const updatedStudy = await studyService.updateStudy(studyId, {
+      // Comportamento normal com persistência
+      console.log(`🔍 Atualizando timer do estudo com ID ${studyId}`);
+      const response = await fetch(`${API_BASE_URL}/api/studies/${studyId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           seconds,
           isActive,
           isPaused
-        });
-        setStudies(prev => 
-          prev.map(s => s.id === studyId ? updatedStudy : s)
-        );
-      }
+        }),
+      });
+      console.log("🔍 Status da resposta de atualização do timer:", response.status);
+      if (!response.ok) throw new Error("Erro ao atualizar timer");
+      const updatedStudy = await response.json();
+      setStudies(prev => 
+        prev.map(s => s.id === studyId ? updatedStudy : s)
+      );
     } catch (err) {
       console.error('Erro ao atualizar timer de estudo:', err);
     }

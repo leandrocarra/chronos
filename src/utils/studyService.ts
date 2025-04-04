@@ -21,16 +21,23 @@ export type UpdateStudy = Partial<
   Omit<Study, "id" | "createdAt" | "updatedAt" | "userId">
 >;
 
+// URL base da API - ajustada para funcionar tanto localmente quanto na Vercel
+const API_BASE_URL = "";
+
 // Serviço para interagir com as APIs de estudo
 export const studyService = {
   // Obter todos os estudos
   async getAllStudies() {
     try {
-      const response = await fetch('/api/studies');
+      console.log("🔍 studyService: Iniciando busca de todos os estudos");
+      const response = await fetch(`${API_BASE_URL}/api/studies`);
+      console.log("🔍 studyService: Resposta da API:", response.status, response.statusText);
       if (!response.ok) {
         throw new Error("Falha ao buscar os estudos");
       }
-      return await response.json();
+      const data = await response.json();
+      console.log("🔍 studyService: Estudos recebidos:", data.length);
+      return data;
     } catch (error) {
       console.error("Erro ao buscar estudos:", error);
       throw error;
@@ -40,11 +47,15 @@ export const studyService = {
   // Obter um estudo específico por ID
   async getStudyById(id: string) {
     try {
-      const response = await fetch(`/api/studies/${id}`);
+      console.log(`🔍 studyService: Buscando estudo com ID ${id}`);
+      const response = await fetch(`${API_BASE_URL}/api/studies/${id}`);
+      console.log("🔍 studyService: Resposta da API:", response.status, response.statusText);
       if (!response.ok) {
         throw new Error("Falha ao buscar o estudo");
       }
-      return await response.json();
+      const data = await response.json();
+      console.log("🔍 studyService: Estudo recebido:", data);
+      return data;
     } catch (error) {
       console.error(`Erro ao buscar estudo com ID ${id}:`, error);
       throw error;
@@ -54,7 +65,8 @@ export const studyService = {
   // Criar um novo estudo
   async createStudy(studyData: NewStudy) {
     try {
-      const response = await fetch('/api/studies', {
+      console.log("🔍 studyService: Criando novo estudo:", studyData);
+      const response = await fetch(`${API_BASE_URL}/api/studies`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,11 +74,14 @@ export const studyService = {
         body: JSON.stringify(studyData),
       });
 
+      console.log("🔍 studyService: Resposta da API:", response.status, response.statusText);
       if (!response.ok) {
         throw new Error("Falha ao criar o estudo");
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log("🔍 studyService: Estudo criado:", data);
+      return data;
     } catch (error) {
       console.error("Erro ao criar estudo:", error);
       throw error;
@@ -76,7 +91,7 @@ export const studyService = {
   // Atualizar um estudo existente
   async updateStudy(id: string, studyData: UpdateStudy) {
     try {
-      const response = await fetch(`/api/studies/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/studies/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +113,7 @@ export const studyService = {
   // Excluir um estudo
   async deleteStudy(id: string) {
     try {
-      const response = await fetch(`/api/studies/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/studies/${id}`, {
         method: 'DELETE',
       });
 

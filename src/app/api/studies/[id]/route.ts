@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-// Removendo temporariamente a dependência do Prisma para fazer o deploy funcionar
-// import { prisma } from "@/lib/prisma-client";
+import { prisma } from "@/lib/prisma-client";
+
+// Middleware para adicionar cabeçalhos CORS
+function corsHeaders() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  };
+}
+
+// Manipulador de requisições OPTIONS para preflight CORS
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders() });
+}
 
 // GET - Buscar um estudo específico
 export async function GET(
@@ -9,24 +22,13 @@ export async function GET(
 ) {
   try {
     const id = context.params.id;
+    console.log(`🔍 API: GET /api/studies/${id} - Buscando estudo específico`);
 
-    // Versão simplificada para fazer o deploy funcionar
-    return NextResponse.json({
-      id: id,
-      subject: "Estudo exemplo",
-      seconds: 0,
-      isActive: false,
-      isPaused: true,
-      userId: "demo-user",
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
-    
-    /* Código original:
     if (!id) {
+      console.log("❌ API: ID do estudo não fornecido");
       return NextResponse.json(
         { error: "ID do estudo não fornecido" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
@@ -35,19 +37,20 @@ export async function GET(
     });
 
     if (!study) {
+      console.log(`❌ API: Estudo com ID ${id} não encontrado`);
       return NextResponse.json(
         { error: "Estudo não encontrado" },
-        { status: 404 }
+        { status: 404, headers: corsHeaders() }
       );
     }
 
-    return NextResponse.json(study);
-    */
+    console.log(`✅ API: Estudo encontrado: ${study.subject}`);
+    return NextResponse.json(study, { headers: corsHeaders() });
   } catch (error) {
-    console.error(`Erro ao buscar estudo com ID ${context.params.id || 'desconhecido'}:`, error);
+    console.error(`❌ API: Erro ao buscar estudo com ID ${context.params.id || 'desconhecido'}:`, error);
     return NextResponse.json(
       { error: "Erro ao buscar o estudo" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }
@@ -59,22 +62,18 @@ export async function PUT(
 ) {
   try {
     const id = context.params.id;
-    const body = await request.json();
+    console.log(`🔍 API: PUT /api/studies/${id} - Atualizando estudo`);
 
-    // Versão simplificada para fazer o deploy funcionar
-    return NextResponse.json({
-      id: id,
-      ...body,
-      updatedAt: new Date()
-    });
-    
-    /* Código original:
     if (!id) {
+      console.log("❌ API: ID do estudo não fornecido");
       return NextResponse.json(
         { error: "ID do estudo não fornecido" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders() }
       );
     }
+
+    const body = await request.json();
+    console.log(`🔍 API: Dados para atualização:`, body);
 
     // Verifica se o estudo existe
     const existingStudy = await prisma.study.findUnique({
@@ -82,9 +81,10 @@ export async function PUT(
     });
 
     if (!existingStudy) {
+      console.log(`❌ API: Estudo com ID ${id} não encontrado para atualização`);
       return NextResponse.json(
         { error: "Estudo não encontrado" },
-        { status: 404 }
+        { status: 404, headers: corsHeaders() }
       );
     }
 
@@ -94,13 +94,13 @@ export async function PUT(
       data: body,
     });
 
-    return NextResponse.json(updatedStudy);
-    */
+    console.log(`✅ API: Estudo atualizado: ${updatedStudy.subject}`);
+    return NextResponse.json(updatedStudy, { headers: corsHeaders() });
   } catch (error) {
-    console.error(`Erro ao atualizar estudo com ID ${context.params.id || 'desconhecido'}:`, error);
+    console.error(`❌ API: Erro ao atualizar estudo com ID ${context.params.id || 'desconhecido'}:`, error);
     return NextResponse.json(
       { error: "Erro ao atualizar o estudo" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }
@@ -112,18 +112,13 @@ export async function DELETE(
 ) {
   try {
     const id = context.params.id;
+    console.log(`🔍 API: DELETE /api/studies/${id} - Excluindo estudo`);
 
-    // Versão simplificada para fazer o deploy funcionar
-    return NextResponse.json(
-      { message: "Estudo excluído com sucesso" },
-      { status: 200 }
-    );
-    
-    /* Código original:
     if (!id) {
+      console.log("❌ API: ID do estudo não fornecido para exclusão");
       return NextResponse.json(
         { error: "ID do estudo não fornecido" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders() }
       );
     }
 
@@ -133,9 +128,10 @@ export async function DELETE(
     });
 
     if (!existingStudy) {
+      console.log(`❌ API: Estudo com ID ${id} não encontrado para exclusão`);
       return NextResponse.json(
         { error: "Estudo não encontrado" },
-        { status: 404 }
+        { status: 404, headers: corsHeaders() }
       );
     }
 
@@ -144,16 +140,16 @@ export async function DELETE(
       where: { id },
     });
 
+    console.log(`✅ API: Estudo com ID ${id} excluído com sucesso`);
     return NextResponse.json(
       { message: "Estudo excluído com sucesso" },
-      { status: 200 }
+      { status: 200, headers: corsHeaders() }
     );
-    */
   } catch (error) {
-    console.error(`Erro ao excluir estudo com ID ${context.params.id || 'desconhecido'}:`, error);
+    console.error(`❌ API: Erro ao excluir estudo com ID ${context.params.id || 'desconhecido'}:`, error);
     return NextResponse.json(
       { error: "Erro ao excluir o estudo" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders() }
     );
   }
 } 
